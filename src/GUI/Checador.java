@@ -30,6 +30,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -147,7 +148,12 @@ public class Checador extends javax.swing.JFrame {
         lCurDirTemp = lCurDirTemp + "\\BioMiniLib";
         File directorio = new File(lCurDirTemp);
         directorio.mkdir();
-        boolean lValDll = Controladores.descomprime(lCurDirTemp);
+        InputStream fis = getClass().getResourceAsStream("BioMiniLib.zip");
+        boolean lValDll = Controladores.descomprime(lCurDirTemp,fis);
+        if(!lValDll){
+            JOptionPane.showMessageDialog(this, "Error al localizar las librerias del lector");
+            System.exit(0);
+        }
         try {
             Controladores.AgregarRuta(lCurDirTemp);
         } catch (IOException e1) {
@@ -762,11 +768,11 @@ public class Checador extends javax.swing.JFrame {
                                                         jLabel4.setText("");
                                                         jLabel4.setText(emp.getNombre().toUpperCase() + " " + emp.getApellidos().toUpperCase());
                                                         mensajes.setForeground(new java.awt.Color(94, 173, 56));
-                                                        setStatusMsg("Correcto");
+                                                        setStatusMsg("CORRECTO");
                                                     } else {
                                                         jLabel4.setText("");
                                                         jLabel4.setText(emp.getNombre().toUpperCase() + " " + emp.getApellidos().toUpperCase());
-                                                        mensajes.setForeground(new java.awt.Color(94, 173, 56));
+                                                        mensajes.setForeground(new java.awt.Color(255, 88, 27));
                                                         setStatusMsg("NO CUENTAS CON UN HORARIO ASIGNADO");
                                                     }
                                                     
@@ -795,7 +801,7 @@ public class Checador extends javax.swing.JFrame {
                                     }
                                     if (!find) {
                                         mensajes.setForeground(Color.red);
-                                        setStatusMsg("Huella no registrada");
+                                        setStatusMsg("HUELLA NO REGISTRADA");
                                         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resources/img/tacha.png")));
 
                                     }
@@ -869,7 +875,8 @@ public class Checador extends javax.swing.JFrame {
                 int response = Utils.comparaHorario(comparar2, comparar3);
                 switch (response) {
                     case 0:
-                        valor = Utils.evaluarDesayuno(this.con, comparar1, comparar2, comparar3, hora, idEmpleado, s);
+                        int desayunor = Utils.evaluarDesayuno(this.con, comparar1, comparar2, comparar3, hora, idEmpleado, s);
+                        valor = insertRow(desayunor, s);
                         break;
                     case 1:
                         //obtenemos la lista de horarios reales del docente
@@ -905,7 +912,9 @@ public class Checador extends javax.swing.JFrame {
                         
                         break;
                     default:
-                        valor = Utils.evaluarAdmon(this.con, comparar1, comparar2, comparar3, hora, idEmpleado, s);
+                        int admonR = Utils.evaluarAdmon(this.con, comparar1, comparar2, comparar3, hora, idEmpleado, s);
+                        valor = insertRow(admonR, s);
+                        
                         break;
                 }
                 if (valor) {
@@ -913,11 +922,7 @@ public class Checador extends javax.swing.JFrame {
                 }
 
             }
-            if (valor && !docenteBool) {
-                Modelo.addRow(new Object[]{s, "A TIEMPO"});
-            } else if(!docenteBool){
-                Modelo.addRow(new Object[]{s, "FUERA DE TIEMPO"});
-            }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -945,6 +950,24 @@ public class Checador extends javax.swing.JFrame {
 
         } else {
             setStatusMsg("No se pudo quitar el lector");
+        }
+    }
+    
+    public boolean insertRow(int response,String s){        
+        switch(response){
+            case 1:
+                Modelo.addRow(new Object[]{s, "A TIEMPO"});
+                return true;
+            case 2:
+                Modelo.addRow(new Object[]{s, "RETARDO"});
+                return true;               
+            case 3:
+                Modelo.addRow(new Object[]{s, "FUERA DE TIEMPO"});
+                return true;
+            case 4:
+                Modelo.addRow(new Object[]{s, "YA REGISTRADO"});
+                return true;
+            default: return false;
         }
     }
 

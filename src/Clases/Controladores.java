@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -23,7 +24,7 @@ public class Controladores {
 
     private static int BUFFER_SIZE = 10000000;
 
-    public static boolean descomprime(String destination) {
+    public static boolean descomprime(String destination,InputStream fis) {
 
         //String filename,
         try {
@@ -34,7 +35,7 @@ public class Controladores {
             // Create a ZipInputStream to read the zip file
             BufferedOutputStream dest = null;
 
-            FileInputStream fis = new FileInputStream("C:\\BioMiniLib.zip");
+            //FileInputStream fis = new FileInputStream("C:\\BioMiniLib.zip");
             //InputStream fis = getClass().getResourceAsStream("BioMiniLib.zip");
 
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));

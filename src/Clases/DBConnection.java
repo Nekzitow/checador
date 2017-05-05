@@ -9,8 +9,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -19,13 +26,16 @@ import javax.swing.JOptionPane;
  */
 public class DBConnection {
     private static DBConnection instance = null;
+    private static final String CONFIG_DIR = "config";
+    private static final String CONFIG_FILE = "conexion.properties";
     private Connection connection;
     protected DBConnection(){
         this.conectaPGSQL();
     }
     
     public Connection getConnection(){
-        return this.connection;
+        //retorna una conexion si esta ve que esta nulla retorna el metodo de conexion de nuevo
+        return connection == null ? this.conectaPGSQL() : connection ;
     }
     
     public void destroy(DBConnection instance){
@@ -122,6 +132,7 @@ public class DBConnection {
             /*if(!VerificaUso()){
                 Archivo.createNewFile();
             }*/
+            obtenerPropiedades(Ip,Puerto, Usuario,Password, BD);
              if(!Archivo.exists()){
                 Archivo.createNewFile();
             }
@@ -139,5 +150,38 @@ public class DBConnection {
             //Utilerias.MensajeInformacion("Ocurrio el siguiente error "+e.getMessage());
             JOptionPane.showMessageDialog(null, e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private static Properties obtenerPropiedades(String Ip,String Puerto,String Usuario,String Password
+            ,String BD) throws IOException{
+        Path configFile = Paths.get(CONFIG_DIR, CONFIG_FILE);
+        Properties props = loadProperties(configFile);
+        props.setProperty("conexion.Ip", Ip);
+        props.setProperty("conexion.Puerto", Puerto);
+        props.setProperty("conexion.Usuario", Usuario);
+        props.setProperty("conexion.Contra", Password);
+        props.setProperty("conexion.BD", BD);
+        saveProperties(configFile,props);
+        return props;
+    }
+    
+    public static void saveProperties(Path configFile,Properties props) throws IOException{
+	props.store(Files.newOutputStream(configFile), "Generado por ObtenerProperties");
+    }
+    
+    public static Properties loadProperties(Path configFile){
+        Properties props = new Properties();
+        File archivo = new File(configFile.toUri());
+        try{
+            if (Files.exists(configFile)){
+                props.load(Files.newInputStream(configFile));
+            } else {
+                archivo.createNewFile();
+                Files.copy(Paths.get("config","conexion.properties"), configFile);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return props;
     }
 }
