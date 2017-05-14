@@ -198,7 +198,7 @@ public class Horario {
                             "INNER JOIN asignacion_clase AS ac ON ac.id_asignacion_horario = asig.id " +
                             "INNER JOIN tipo_horario ON tipo_horario.id = id_tipo_horario " +
                             "INNER JOIN parametros ON parametros.id = id_parametros "+
-                            "WHERE asig.id_empleado = ?  AND dia=? GROUP BY clave_materias,id_grupos,tiempo_antes,tiempo_despues";
+                            "WHERE asig.id_empleado = ?  AND dia=? GROUP BY clave_materias,id_grupos,tiempo_antes,tiempo_despues ORDER BY hora_entrada";
             PreparedStatement pstmt = con.prepareStatement(query);
             pstmt.setInt(1, idEmpleado);
             pstmt.setInt(2, getDiaActual());

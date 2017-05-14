@@ -764,7 +764,7 @@ public class Checador extends javax.swing.JFrame {
                                                 if (refVerify.getValue() == 1) {
                                                     ArrayList<Horario> horario = Horario.horarioDia(con, emp.getId());
                                                     if (horario.size() > 0) {
-                                                        validarHora(horario, emp.getId());
+                                                        validarHora(horario, emp.getId(),emp.getIdTipoEmpleado());
                                                         jLabel4.setText("");
                                                         jLabel4.setText(emp.getNombre().toUpperCase() + " " + emp.getApellidos().toUpperCase());
                                                         mensajes.setForeground(new java.awt.Color(94, 173, 56));
@@ -855,7 +855,7 @@ public class Checador extends javax.swing.JFrame {
         return reloj;
     }
 
-    public void validarHora(ArrayList<Horario> horas, int idEmpleado) {
+    public void validarHora(ArrayList<Horario> horas, int idEmpleado, int idTipoEmpleado) {
         try {
             Date now = new Date();
             SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
@@ -881,34 +881,39 @@ public class Checador extends javax.swing.JFrame {
                     case 1:
                         //obtenemos la lista de horarios reales del docente
                         docenteBool = true;
-                        ArrayList<Horario> horarioD = Horario.horarioDiaDocente(con, idEmpleado);
-                        for (Horario horaD : horarioD) {
-                            //hora1
-                            comparar4 = df.parse(horaD.getHoraEntrada());
-                            //hora2
-                            comparar5 = df.parse(horaD.getHoraSalida());
-                            int response2 = Utils.comparaHorario(comparar4, comparar5);
-                            int valorD = Utils.evaluarDocente(this.con, comparar1, comparar4, comparar5, horaD, idEmpleado, s);
-                            switch (valorD){
-                                case 1:
-                                    Modelo.addRow(new Object[]{s, "A TIEMPO"});
-                                    valor = true;
-                                    break;
-                                case 2:
-                                    Modelo.addRow(new Object[]{s, "RETARDO"});
-                                    valor = true;
-                                    break;
-                                case 3:
-                                    Modelo.addRow(new Object[]{s, "FUERA DE TIEMPO"});
-                                    valor = true;
-                                    break;
-                                case 4:
-                                    Modelo.addRow(new Object[]{s, "YA REGISTRADO"});
-                                    valor = true;
-                                    break;
+                        if (idTipoEmpleado == 10 ) {
+                            ArrayList<Horario> horarioD = Horario.horarioDiaDocente(con, idEmpleado);
+                            for (Horario horaD : horarioD) {
+                                //hora1
+                                comparar4 = df.parse(horaD.getHoraEntrada());
+                                //hora2
+                                comparar5 = df.parse(horaD.getHoraSalida());
+                                int response2 = Utils.comparaHorario(comparar4, comparar5);
+                                int valorD = Utils.evaluarDocente(this.con, comparar1, comparar4, comparar5, horaD, idEmpleado, s,response2);
+                                switch (valorD){
+                                    case 1:
+                                        Modelo.addRow(new Object[]{s, "REGISTRADO"});
+                                        valor = true;
+                                        break;
+                                    case 2:
+                                        Modelo.addRow(new Object[]{s, "RETARDO"});
+                                        valor = true;
+                                        break;
+                                    case 3:
+                                        //Modelo.addRow(new Object[]{s, "FUERA DE TIEMPO"});
+                                        valor = true;
+                                        break;
+                                    case 4:
+                                        Modelo.addRow(new Object[]{s, "YA REGISTRADO"});
+                                        valor = true;
+                                        break;
+                                }
+
                             }
-                            
+                        }else{
+                            valor = false;
                         }
+                        
                         
                         break;
                     default:
@@ -956,17 +961,17 @@ public class Checador extends javax.swing.JFrame {
     public boolean insertRow(int response,String s){        
         switch(response){
             case 1:
-                Modelo.addRow(new Object[]{s, "A TIEMPO"});
+                Modelo.addRow(new Object[]{s, "REGISTRADO"});
                 return true;
             case 2:
                 Modelo.addRow(new Object[]{s, "RETARDO"});
                 return true;               
             case 3:
-                Modelo.addRow(new Object[]{s, "FUERA DE TIEMPO"});
-                return true;
+                //Modelo.addRow(new Object[]{s, "FUERA DE TIEMPO"});
+                return false;
             case 4:
                 Modelo.addRow(new Object[]{s, "YA REGISTRADO"});
-                return true;
+                return false;
             default: return false;
         }
     }

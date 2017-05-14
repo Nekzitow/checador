@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -312,9 +313,11 @@ public class Empleado {
                 emp.setHuellaDigital(rs.getBytes("huella_digital"));
                 emp.setTemplateSize(rs.getInt("template_size"));
                 emp.setIdPuesto(rs.getInt("id_puesto"));
+                emp.setIdTipoEmpleado(rs.getInt("id_tipo_empleado"));
                 lista.add(emp);
             }
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "NO HAY CONEXIÓN CON EL SERVIDOR, CONTACTE A SISTEMAS");
             e.printStackTrace();
         }
         return lista;
